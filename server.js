@@ -7,6 +7,7 @@ const app = express();
 app.use(express.json());
 app.use("/api", router);
 
+//Generic catch-all error handler middleware
 app.use((err, req, res, next) => {
   console.error(err);
   res.json({ name: err.name, msg: err.message });
