@@ -37,11 +37,21 @@ router.put("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
     const updatedData = req.body;
-    if (id && updatedData?.length > 0) {
+    const columns = ["Name", "Price", "CategoryID", "OnSale", "StockLevel"];
+    //I want to check that all of the provided columns match the columns in the database
+    const columnsMatch = Object.keys(updatedData).every((key) =>
+      columns.includes(key)
+    );
+
+    if (id && columnsMatch) {
       const result = await products.updateOne(id, updatedData);
       res.json(result);
     } else {
-      throw Error("Missing data and/or id");
+      if (columnsMatch) throw Error("Missing id");
+      else
+        throw Error(
+          "Provided data does not match columns in the Products table"
+        );
     }
   } catch (err) {
     next(err, req, res);
@@ -52,6 +62,9 @@ router.put("/:id", async (req, res, next) => {
 router.delete("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
+    if (isNaN(Number(id))) {
+      throw Error("Provided id is not a number");
+    }
 
     if (id) {
       const result = await products.removeOne(id);
